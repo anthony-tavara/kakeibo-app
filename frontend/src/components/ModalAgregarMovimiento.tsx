@@ -81,6 +81,8 @@ export default function ModalMovimiento({
       monto: Number(monto),
     };
 
+    console.log("nuevo id:", nuevo.id);
+
     setMovimientosArray((prev) => [nuevo, ...prev]);
     onCerrar();
   }

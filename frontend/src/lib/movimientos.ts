@@ -18,11 +18,20 @@ export async function guardarMovimiento(
   cuentaId: string,
   m: Movimiento,
 ): Promise<boolean> {
+  const body = {
+    id: m.id,
+    esIngreso: m.esIngreso,
+    monto: m.monto,
+    titulo: m.titulo,
+    detalle: m.detalle,
+    fecha: m.fecha,
+    cuenta_id: cuentaId,
+  };
   try {
     const res = await fetch(`${API_URL}/${cuentaId}/movimientos`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(m),
+      body: JSON.stringify(body),
     });
     return res.ok;
   } catch (err) {
