@@ -3,7 +3,13 @@ import { ars } from "../lib/utils";
 import GuardarMovimientos from "./GuardarMovimientos";
 import ImportarJson from "./importarJson";
 
+export type Cuenta = {
+  id: string;
+  nombre: string;
+};
+
 interface MontoProps {
+  cuenta: Cuenta;
   setCargando: React.Dispatch<React.SetStateAction<boolean>>;
   movimientosArray: Movimiento[];
   setMovimientosArray: React.Dispatch<React.SetStateAction<Movimiento[]>>;
@@ -11,6 +17,7 @@ interface MontoProps {
 }
 
 export default function Balance({
+  cuenta,
   setCargando,
   movimientosArray,
   setModalAbierto,
@@ -48,6 +55,9 @@ export default function Balance({
 
   return (
     <section>
+      <h1 className="text-sm md:text-lg font-semibold text-en text-[#1E2B57]/70 pb-4">
+        {cuenta.nombre}
+      </h1>
       <dl className="grid grid-cols-2 gap-6  border-[#1E2B57]/15 pb-10">
         <div>
           <dt className="text-sm text-[#1E2B57]/70">Ingresos</dt>
@@ -98,6 +108,7 @@ export default function Balance({
         <div className="flex gap-2">
           <ImportarJson setMovimientosArray={setMovimientosArray} />
           <GuardarMovimientos
+            cuentaId="1"
             movimientosArray={movimientosArray}
             setCargando={setCargando}
           />

@@ -1,6 +1,6 @@
 import type { Movimiento } from "./types";
 
-export const API_URL = import.meta.env.VITE_API_URL
+export const API_URL = import.meta.env.VITE_API_URL;
 
 export function esMovimientoValido(m: any): m is Movimiento {
   return (
@@ -14,16 +14,19 @@ export function esMovimientoValido(m: any): m is Movimiento {
   );
 }
 
-export async function guardarMovimiento(m: Movimiento): Promise<boolean> {
+export async function guardarMovimiento(
+  cuentaId: string,
+  m: Movimiento,
+): Promise<boolean> {
   try {
-    const res = await fetch(`${API_URL}/movimientos`, {
+    const res = await fetch(`${API_URL}/${cuentaId}/movimientos`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(m),
     });
     return res.ok;
   } catch (err) {
-    console.error("Error guardando movimiento", m.id, err);
+    console.error("Error guardando movimiento", cuentaId, m.id, err);
     return false;
   }
 }

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Dispatch, FormEvent, SetStateAction } from "react";
 import type { Movimiento } from "../lib/types";
 import { hoyISO } from "../lib/utils";
+import { v4 as uuidv4 } from "uuid";
 
 type Props = {
   abierto: boolean;
@@ -72,7 +73,7 @@ export default function ModalMovimiento({
     }
 
     const nuevo: Movimiento = {
-      id: crypto.randomUUID(),
+      id: uuidv4(),
       titulo: titulo,
       esIngreso: tipo,
       detalle: descripcion,

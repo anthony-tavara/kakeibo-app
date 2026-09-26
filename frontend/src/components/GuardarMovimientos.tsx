@@ -3,6 +3,7 @@ import type { Movimiento } from "../lib/types";
 import { guardarMovimiento } from "../lib/movimientos";
 
 interface GuardarMovimientosProps {
+  cuentaId: string;
   movimientosArray: Movimiento[];
   setCargando: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -10,6 +11,7 @@ interface GuardarMovimientosProps {
 const TAMANIO_LOTE = 10;
 
 export default function GuardarMovimientos({
+  cuentaId,
   movimientosArray,
   setCargando,
 }: GuardarMovimientosProps) {
@@ -25,7 +27,7 @@ export default function GuardarMovimientos({
 
     for (let i = 0; i < movimientosArray.length; i += TAMANIO_LOTE) {
       const lote = movimientosArray.slice(i, i + TAMANIO_LOTE);
-      const resultados = await Promise.all(lote.map(guardarMovimiento));
+      const resultados = await Promise.all(lote.map((m) => guardarMovimiento(cuentaId, m)));
       fallidos += resultados.filter((ok) => !ok).length;
       setProgreso({
         hechos: Math.min(i + TAMANIO_LOTE, movimientosArray.length),
