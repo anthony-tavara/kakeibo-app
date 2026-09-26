@@ -11,11 +11,8 @@ type Props = {
 export default function Movimientos({ movimientosArray }: Props) {
   const [verTodos, setVerTodos] = useState(false);
 
-  console.log(movimientosArray)
-
-  // Más recientes primero; si la fecha es igual, el último cargado va arriba
   const ordenados = [...movimientosArray].sort(
-    (a, b) => b.fecha.localeCompare(a.fecha) || b.id - a.id,
+    (a, b) => b.fecha.localeCompare(a.fecha) || Number(b.id) - Number(a.id),
   );
   const visibles = verTodos ? ordenados : ordenados.slice(0, VISIBLES);
 
@@ -42,7 +39,6 @@ export default function Movimientos({ movimientosArray }: Props) {
       ) : (
         <ul>
           {visibles.map((m) => {
-            console.log(m.titulo, m.esIngreso)
             return (
               <li
                 key={m.id}
@@ -55,7 +51,9 @@ export default function Movimientos({ movimientosArray }: Props) {
                   <p className="font-medium">{m.titulo}</p>
                   <p className="text-sm text-[#1E2B57]/70">{m.detalle}</p>
                 </div>
-                <p className={`font-medium ${m.esIngreso ? "text-[#2E7D55]" : ""}`}>
+                <p
+                  className={`font-medium ${m.esIngreso ? "text-[#2E7D55]" : ""}`}
+                >
                   {m.esIngreso ? "+" : "−"}
                   {ars.format(Math.abs(m.monto))}
                 </p>

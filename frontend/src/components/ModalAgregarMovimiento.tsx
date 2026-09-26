@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { Dispatch, FormEvent, SetStateAction } from "react";
-import { CATEGORIAS } from "../lib/types";
-import type { Movimiento, Tipo } from "../lib/types";
+import type { Movimiento } from "../lib/types";
 import { hoyISO } from "../lib/utils";
 
 type Props = {
@@ -12,7 +11,7 @@ type Props = {
 
 type Errores = {
   monto?: string;
-  descripcion?: string;
+  titulo?: string;
   fecha?: string;
 };
 
@@ -33,24 +32,6 @@ export default function ModalMovimiento({
   const [fecha, setFecha] = useState(hoyISO());
   const [errores, setErrores] = useState<Errores>({});
 
-  const agregarMovimiento = async () => {
-    await fetch("http://localhost:3000/movimientos", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        esIngreso: tipo,
-        monto: monto,
-        titulo: titulo,
-        detalle: descripcion,
-        fecha: fecha,
-      }),
-    })
-    .then((r) => r.json())
-    .then((data) => console.log("Respuesta del servidor:", data))
-    .catch((err) => console.error("Error en la petición:", err));
-  }
-
-  // Sincroniza el estado con el <dialog> nativo (foco atrapado y cierre con Esc)
   useEffect(() => {
     const dialogo = ref.current;
     if (!dialogo) return;
@@ -61,9 +42,9 @@ export default function ModalMovimiento({
     if (!abierto && dialogo.open) dialogo.close();
   }, [abierto]);
 
-  // Deja el formulario limpio para la próxima vez que se abra
   function reiniciar() {
     setTipo(false);
+    setTitulo("");
     setMonto("");
     setDescripcion("");
     setFecha(hoyISO());
@@ -76,14 +57,14 @@ export default function ModalMovimiento({
     const valor = Number(monto);
     const nuevos: Errores = {};
     if (!valor) nuevos.monto = "Ingresá un monto mayor a 0";
-    /* if (!descripcion.trim()) nuevos.descripcion = "Agregá una descripción"; */
+    if (!titulo.trim()) nuevos.titulo = "Agregá un titulo";
     if (!fecha) nuevos.fecha = "Elegí una fecha";
 
     if (Object.keys(nuevos).length > 0) {
       setErrores(nuevos);
       const primero = nuevos.monto
         ? "#mov-monto"
-        : nuevos.descripcion
+        : nuevos.titulo
           ? "#mov-desc"
           : "#mov-fecha";
       ref.current?.querySelector<HTMLElement>(primero)?.focus();
@@ -91,15 +72,14 @@ export default function ModalMovimiento({
     }
 
     const nuevo: Movimiento = {
-      id: Date.now(),
-      titulo: descripcion.trim(),
-      esIngreso: true,
-      detalle: "",
-      fecha,
-      monto: 0,
+      id: crypto.randomUUID(),
+      titulo: titulo,
+      esIngreso: tipo,
+      detalle: descripcion,
+      fecha: fecha,
+      monto: Number(monto),
     };
 
-    // Versión con (prev) => ...: siempre parte del estado más reciente
     setMovimientosArray((prev) => [nuevo, ...prev]);
     onCerrar();
   }
@@ -109,21 +89,15 @@ export default function ModalMovimiento({
       ref={ref}
       aria-labelledby="titulo-modal"
       onClose={() => {
-        // Se dispara siempre que se cierra (Esc, botones o fondo)
         reiniciar();
         onCerrar();
       }}
       onClick={(e) => {
-        // Un clic en el fondo oscuro cierra el modal
         if (e.target === e.currentTarget) onCerrar();
       }}
       className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl bg-[#E8EEF0] p-0 text-[#1E2B57] shadow-2xl backdrop:bg-[#1E2B57]/40"
     >
-      <form
-        noValidate
-        className="flex flex-col gap-6 p-6"
-        onSubmit={guardar}
-      >
+      <form noValidate className="flex flex-col gap-6 p-6" onSubmit={guardar}>
         <div className="flex items-center justify-between">
           <h2 id="titulo-modal" className="text-lg font-medium">
             Agregar movimiento
@@ -148,7 +122,6 @@ export default function ModalMovimiento({
           </button>
         </div>
 
-        {/* Tipo */}
         <div
           role="group"
           aria-label="Tipo de movimiento"
@@ -158,11 +131,11 @@ export default function ModalMovimiento({
             <button
               key={t}
               type="button"
-              onClick={() => {setTipo(!tipo)
-                console.log(tipo)
+              onClick={() => {
+                setTipo(!tipo);
               }}
               className={`rounded-md py-2.5 font-medium transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1E2B57] ${
-                tipo === (t === "egreso" ? true : false)
+                tipo === (t === "egreso" ? false : true)
                   ? "bg-[#1E2B57] text-[#F4F6F4]"
                   : "text-[#1E2B57]/70 hover:text-[#1E2B57]"
               }`}
@@ -172,7 +145,6 @@ export default function ModalMovimiento({
           ))}
         </div>
 
-        {/* Monto */}
         <div>
           <label htmlFor="mov-monto" className="text-sm text-[#1E2B57]/70">
             Monto
@@ -190,9 +162,11 @@ export default function ModalMovimiento({
               placeholder="0"
               value={monto ? Number(monto).toLocaleString("es-AR") : ""}
               onChange={(e) => {
-                // Deja solo dígitos, sin ceros a la izquierda y con un tope razonable
                 setMonto(
-                  e.target.value.replace(/\D/g, "").slice(0, 12).replace(/^0+/, ""),
+                  e.target.value
+                    .replace(/\D/g, "")
+                    .slice(0, 12)
+                    .replace(/^0+/, ""),
                 );
                 setErrores((prev) => ({ ...prev, monto: undefined }));
               }}
@@ -219,20 +193,19 @@ export default function ModalMovimiento({
             value={titulo}
             onChange={(e) => {
               setTitulo(e.target.value);
-              /* setErrores((prev) => ({ ...prev, descripcion: undefined })); */
+              setErrores((prev) => ({ ...prev, titulo: undefined }));
             }}
-            /* aria-invalid={!!errores.descripcion}
-            aria-describedby={errores.descripcion ? "err-desc" : undefined} */
+            aria-invalid={!!errores.titulo}
+            aria-describedby={errores.titulo ? "err-titulo" : undefined}
             className={campo}
           />
-          {/* {errores.descripcion && (
+          {errores.titulo && (
             <p id="err-desc" className="mt-2 text-sm text-[#C2334D]">
-              {errores.descripcion}
+              {errores.titulo}
             </p>
-          )} */}
+          )}
         </div>
 
-        {/* Descripción */}
         <div>
           <label htmlFor="mov-desc" className="text-sm text-[#1E2B57]/70">
             Descripción
@@ -244,20 +217,11 @@ export default function ModalMovimiento({
             value={descripcion}
             onChange={(e) => {
               setDescripcion(e.target.value);
-              /* setErrores((prev) => ({ ...prev, descripcion: undefined })); */
             }}
-            aria-invalid={!!errores.descripcion}
-            aria-describedby={errores.descripcion ? "err-desc" : undefined}
             className={campo}
           />
-          {errores.descripcion && (
-            <p id="err-desc" className="mt-2 text-sm text-[#C2334D]">
-              {errores.descripcion}
-            </p>
-          )}
         </div>
 
-        {/* Fecha */}
         <div>
           <label htmlFor="mov-fecha" className="text-sm text-[#1E2B57]/70">
             Fecha
@@ -281,7 +245,6 @@ export default function ModalMovimiento({
           )}
         </div>
 
-        {/* Acciones */}
         <div className="flex gap-3">
           <button
             type="button"
@@ -292,7 +255,6 @@ export default function ModalMovimiento({
           </button>
           <button
             type="submit"
-            onClick={() => agregarMovimiento()}
             className="flex-[2] rounded-lg bg-[#1E2B57] px-5 py-3.5 font-medium text-[#F4F6F4] transition active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1E2B57]"
           >
             Guardar movimiento
