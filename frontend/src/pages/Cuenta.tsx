@@ -1,47 +1,44 @@
 import { useEffect, useState } from "react";
 import Movimientos from "../components/Movimientos";
 import ModalAgregarMovimiento from "../components/ModalAgregarMovimiento";
-import type { Movimiento } from "../lib/types";
+import type { Movimiento, Cuenta } from "../lib/types";
 import Monto from "../components/Balance";
 import Loading from "../components/Loading";
 import { useParams } from "react-router-dom";
-export const API_URL = import.meta.env.VITE_API_URL
-
-export type Cuenta = {
-  id: string;
-  nombre: string;
-}
+import NotFound from "../components/NotFound";
+export const API_URL = import.meta.env.VITE_API_URL;
 
 export default function Cuenta() {
   const { id } = useParams<{ id: string }>();
-
-  console.log(id)
-
-  const [cuenta, setCuenta] = useState<Cuenta>({id : "", nombre: ""});
+  const [cuenta, setCuenta] = useState<Cuenta>({ id: "", nombre: "" });
+  const [seEncontroCuenta, setSeEncontroCuenta] = useState(true);
   const [cargando, setCargando] = useState(false);
   const [movimientosArray, setMovimientosArray] = useState<Movimiento[]>([]);
 
-   const obtenerCuenta = async () => {
-      const respuesta = await fetch(`${API_URL}/${id}`);
-      const datos = await respuesta.json();
-      setCuenta(datos[0])
-      return datos
+  const obtenerCuenta = async () => {
+    const respuesta = await fetch(`${API_URL}/${id}`);
+    const datos = await respuesta.json();
+    if (!datos?.[0]) {
+      setSeEncontroCuenta(false);
+      return;
+    }
+    setCuenta(datos[0]);
+    return datos;
   };
 
   const obtenerMovimientos = async () => {
     try {
       const respuesta = await fetch(`${API_URL}/${id}/movimientos`);
       const datos = await respuesta.json();
-      console.log(datos)
       setMovimientosArray(datos);
     } finally {
-      setCargando(false)
+      setCargando(false);
     }
   };
 
   useEffect(() => {
     setCargando(true);
-    obtenerCuenta()
+    obtenerCuenta();
     obtenerMovimientos();
   }, []);
 
@@ -51,11 +48,13 @@ export default function Cuenta() {
     <>
       {cargando && <Loading />}
 
+      {!seEncontroCuenta && <NotFound />}
+
       <main className="app-font min-h-screen bg-[#E8EEF0] text-[#1E2B57]">
         <div className="mx-auto flex w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-14 px-6 py-10 sm:py-16">
           <Monto
-          cuenta={cuenta}
-          setCargando={setCargando}
+            cuenta={cuenta}
+            setCargando={setCargando}
             movimientosArray={movimientosArray}
             setModalAbierto={setModalAbierto}
             setMovimientosArray={setMovimientosArray}

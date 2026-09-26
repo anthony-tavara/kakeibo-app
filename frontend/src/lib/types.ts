@@ -6,3 +6,8 @@ export type Movimiento = {
   fecha: string;
   monto: number;
 };
+
+export type Cuenta = {
+  id: string;
+  nombre: string;
+};
