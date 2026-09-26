@@ -9,10 +9,14 @@ app.use(express.json());
 const pool = require('./db');
 const port = 3000;
 
-app.get('/', async (req, res) => {
+app.get('/cuentas', async (req, res) => {
   try {
     const { rows } = await pool.query(
-      `select * from cuenta`,
+      `
+      SELECT * 
+      FROM cuenta c
+      ORDER BY c.id ASC
+      `,
     );
     res.json(rows);
   } catch (err) {
