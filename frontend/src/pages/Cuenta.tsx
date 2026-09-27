@@ -7,6 +7,7 @@ import Loading from "../components/Loading";
 import { useParams } from "react-router-dom";
 import NotFound from "../components/NotFound";
 import ModalEditarMovimiento from "../components/ModalEditarMovimiento";
+import ModalEliminarMovimiento from "../components/ModalEliminarMovimiento";
 export const API_URL = import.meta.env.VITE_API_URL;
 
 export default function Cuenta() {
@@ -16,6 +17,11 @@ export default function Cuenta() {
   const [cargando, setCargando] = useState(true);
   const [movimientosArray, setMovimientosArray] = useState<Movimiento[]>([]);
   const [movimientoEditar, setMovimientoEditar] = useState<Movimiento>();
+  const [movimientoEliminar, setMovimientoEliminar] = useState<Movimiento>();
+
+  function eliminarMovimiento(id: string) {
+    setMovimientosArray((prev) => prev.filter((m) => m.id !== id));
+  }
 
   useEffect(() => {
     const obtenerCuenta = async () => {
@@ -45,6 +51,7 @@ export default function Cuenta() {
 
   const [modalAbierto, setModalAbierto] = useState(false);
   const [mostrarModalEditarMov, setMostrarModalEditarMov] = useState(false);
+  const [mostrarModalEliminarMov, setMostrarModalEliminarMov] = useState(false);
 
   return (
     <>
@@ -63,6 +70,8 @@ export default function Cuenta() {
           />
           <Movimientos
             onAbrirModalEditarMov={() => setMostrarModalEditarMov(true)}
+            onAbrirModalEliminarMov={() => setMostrarModalEliminarMov(true)}
+            setMovimientoEliminar={setMovimientoEliminar}
             movimientosArray={movimientosArray}
             setMovimientoEditar={setMovimientoEditar}
           />
@@ -80,6 +89,16 @@ export default function Cuenta() {
             movimientoEditar={movimientoEditar}
             abierto={mostrarModalEditarMov}
             onCerrar={() => setMostrarModalEditarMov(false)}
+          />
+        )}
+        {movimientoEliminar && (
+          <ModalEliminarMovimiento
+            key={movimientoEliminar.id}
+            cuentaId={cuenta.id}
+            movimiento={movimientoEliminar}
+            abierto={mostrarModalEliminarMov}
+            onCerrar={() => setMostrarModalEliminarMov(false)}
+            onConfirmar={eliminarMovimiento}
           />
         )}
       </main>

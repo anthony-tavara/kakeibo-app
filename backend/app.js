@@ -1,15 +1,14 @@
-const express = require('express');
-const cors = require('cors');
+const express = require("express");
+const cors = require("cors");
 const app = express();
-
 
 app.use(cors());
 app.use(express.json());
 
-const pool = require('./db');
+const pool = require("./db");
 const port = 3000;
 
-app.get('/cuentas', async (req, res) => {
+app.get("/cuentas", async (req, res) => {
   try {
     const { rows } = await pool.query(
       `
@@ -21,33 +20,32 @@ app.get('/cuentas', async (req, res) => {
     res.json(rows);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'No se pudieron obtener las cuentas' });
+    res.status(500).json({ error: "No se pudieron obtener las cuentas" });
   }
 });
 
-app.get('/:id', async (req, res) => {
-  const id = req.params.id
+app.get("/:id", async (req, res) => {
+  const id = req.params.id;
 
   try {
-    const { rows } = await pool.query(
-      'SELECT * FROM cuenta c WHERE id = $1',
-      [id]
-    );
+    const { rows } = await pool.query("SELECT * FROM cuenta c WHERE id = $1", [
+      id,
+    ]);
 
     if (rows === 0) {
       return res.status(404).json({
-        error: `No existe una cuenta con id ${id}`
+        error: `No existe una cuenta con id ${id}`,
       });
     }
     res.json(rows);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'No se pudo obtener la cuenta' });
+    res.status(500).json({ error: "No se pudo obtener la cuenta" });
   }
 });
 
-app.get('/:id/movimientos', async (req, res) => {
-  const id = req.params.id
+app.get("/:id/movimientos", async (req, res) => {
+  const id = req.params.id;
   try {
     const { rows } = await pool.query(
       `        
@@ -62,29 +60,34 @@ app.get('/:id/movimientos', async (req, res) => {
          from movimientos m
          where cuenta_id = $1
         order by fecha desc, created_at desc`,
-        [id]
+      [id],
     );
     res.json(rows);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'No se pudieron obtener los movimientos de la cuenta' });
+    res
+      .status(500)
+      .json({ error: "No se pudieron obtener los movimientos de la cuenta" });
   }
 });
 
 function validarMovimiento(body) {
   const { id, esIngreso, monto, titulo, fecha } = body;
-  if (typeof id !== 'string' || id.length === 0) return 'id inválido';
-  if (typeof esIngreso !== 'boolean') return 'esIngreso inválido';
-  if (typeof monto !== 'number' || !Number.isFinite(monto)) return 'monto inválido';
-  if (typeof titulo !== 'string' || titulo.trim().length === 0) return 'titulo inválido';
-  if (typeof fecha !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(fecha)) return 'fecha inválida';
+  if (typeof id !== "string" || id.length === 0) return "id inválido";
+  if (typeof esIngreso !== "boolean") return "esIngreso inválido";
+  if (typeof monto !== "number" || !Number.isFinite(monto))
+    return "monto inválido";
+  if (typeof titulo !== "string" || titulo.trim().length === 0)
+    return "titulo inválido";
+  if (typeof fecha !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(fecha))
+    return "fecha inválida";
   return null;
 }
 
-app.post('/:id/movimientos', async (req, res) => {
+app.post("/:id/movimientos", async (req, res) => {
   const cuentaId = Number(req.params.id);
   if (!Number.isInteger(cuentaId)) {
-    return res.status(400).json({ error: 'cuentaId inválido' });
+    return res.status(400).json({ error: "cuentaId inválido" });
   }
 
   const error = validarMovimiento(req.body);
@@ -100,7 +103,7 @@ app.post('/:id/movimientos', async (req, res) => {
        values ($1, $2, $3, $4, $5, $6, $7)
        on conflict (id) do nothing
        returning id, esIngreso as "esIngreso", monto::float8 as monto, titulo, detalle, fecha::text as fecha`,
-      [id, esIngreso, monto, titulo.trim(), detalle ?? '', fecha, cuentaId],
+      [id, esIngreso, monto, titulo.trim(), detalle ?? "", fecha, cuentaId],
     );
 
     if (rows.length === 0) {
@@ -110,11 +113,11 @@ app.post('/:id/movimientos', async (req, res) => {
     res.status(201).json(rows[0]);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'No se pudo agregar el nuevo movimiento' });
+    res.status(500).json({ error: "No se pudo agregar el nuevo movimiento" });
   }
 });
 
-app.put('/movimientos', async (req, res) => {
+app.put("/movimientos", async (req, res) => {
   const error = validarMovimiento(req.body);
   if (error) {
     return res.status(400).json({ error });
@@ -129,13 +132,62 @@ app.put('/movimientos', async (req, res) => {
       set esingreso=$2, monto=$3, titulo=$4, detalle=$5, fecha=$6
       where id=$1
       `,
-      [id, esIngreso, monto, titulo.trim(), detalle ?? '', fecha],
+      [id, esIngreso, monto, titulo.trim(), detalle ?? "", fecha],
     );
 
     res.status(201).json(rows[0]);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'No se pudo actualizar el movimiento' });
+    res.status(500).json({ error: "No se pudo actualizar el movimiento" });
+  }
+});
+
+function validarId(body) {
+  const { id } = body;
+  if (typeof id !== "string" || id.length === 0) return "id inválido";
+  return null;
+}
+
+app.delete("/cuentas/:cuentaId/movimientos/", async (req, res) => {
+  const cuentaId = Number(req.params.cuentaId);
+  if (!Number.isInteger(cuentaId)) {
+    return res.status(400).json({ error: "cuentaId inválido" });
+  }
+
+  const error = validarId(req.body);
+  if (error) {
+    return res.status(400).json({ error });
+  }
+
+  const { id } = req.body;
+
+  try {
+    const cuentaExiste = await pool.query(
+      "select 1 from cuenta where id = $1",
+      [cuentaId],
+    );
+
+    if (cuentaExiste.rowCount === 0) {
+      return res.status(404).json({ error: "Cuenta no encontrada" });
+    }
+
+    const { rows, rowCount } = await pool.query(
+      `
+      delete from movimientos
+      where id = $1 and cuenta_id = $2
+      returning *
+      `,
+      [id, cuentaId],
+    );
+
+    if (rowCount === 0) {
+      return res.status(404).json({ error: "Movimiento no encontrado" });
+    }
+
+    res.status(200).json(rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "No se pudo eliminar el movimiento" });
   }
 });
 

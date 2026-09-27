@@ -61,3 +61,21 @@ export async function editarMovimiento(m: Movimiento): Promise<boolean> {
     return false;
   }
 }
+
+export async function eliminarMovimiento(
+  cuentaId: string,
+  movimientoId: string,
+): Promise<boolean> {
+  const body = { id: movimientoId };
+  try {
+    const res = await fetch(`${API_URL}/cuentas/${cuentaId}/movimientos`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    return res.ok;
+  } catch (err) {
+    console.error("Error guardando movimiento", cuentaId, movimientoId, err);
+    return false;
+  }
+}

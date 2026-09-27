@@ -7,13 +7,21 @@ const VISIBLES = 6;
 
 type Props = {
   onAbrirModalEditarMov: () => void;
+  onAbrirModalEliminarMov: () => void;
   movimientosArray: Movimiento[];
-  setMovimientoEditar: React.Dispatch<React.SetStateAction<Movimiento | undefined>>;
+  setMovimientoEditar: React.Dispatch<
+    React.SetStateAction<Movimiento | undefined>
+  >;
+  setMovimientoEliminar: React.Dispatch<
+    React.SetStateAction<Movimiento | undefined>
+  >;
 };
 
 export default function Movimientos({
   setMovimientoEditar,
+  setMovimientoEliminar,
   onAbrirModalEditarMov,
+  onAbrirModalEliminarMov,
   movimientosArray,
 }: Props) {
   const [verTodos, setVerTodos] = useState(false);
@@ -67,8 +75,8 @@ export default function Movimientos({
                   </p>
                   <button
                     onClick={() => {
-                      setMovimientoEditar(m)
-                      onAbrirModalEditarMov()
+                      setMovimientoEditar(m);
+                      onAbrirModalEditarMov();
                     }}
                     type="button"
                     aria-label="Editar movimiento"
@@ -77,6 +85,10 @@ export default function Movimientos({
                     <SquarePen className="size-4" strokeWidth={2} />
                   </button>
                   <button
+                    onClick={() => {
+                      setMovimientoEliminar(m);
+                      onAbrirModalEliminarMov();
+                    }}
                     type="button"
                     aria-label="Eliminar movimiento"
                     className="rounded-lg  text-[#C2334D]/70 transition hover:text-[#C2334D] cursor-pointer"
