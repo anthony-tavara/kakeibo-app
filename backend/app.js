@@ -87,8 +87,6 @@ app.post('/:id/movimientos', async (req, res) => {
     return res.status(400).json({ error: 'cuentaId inválido' });
   }
 
-  console.log(req.body)
-
   const error = validarMovimiento(req.body);
   if (error) {
     return res.status(400).json({ error });
@@ -113,6 +111,31 @@ app.post('/:id/movimientos', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'No se pudo agregar el nuevo movimiento' });
+  }
+});
+
+app.put('/movimientos', async (req, res) => {
+  const error = validarMovimiento(req.body);
+  if (error) {
+    return res.status(400).json({ error });
+  }
+
+  const { id, esIngreso, monto, titulo, detalle, fecha } = req.body;
+
+  try {
+    const { rows } = await pool.query(
+      `
+      update movimientos
+      set esingreso=$2, monto=$3, titulo=$4, detalle=$5, fecha=$6
+      where id=$1
+      `,
+      [id, esIngreso, monto, titulo.trim(), detalle ?? '', fecha],
+    );
+
+    res.status(201).json(rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'No se pudo actualizar el movimiento' });
   }
 });
 

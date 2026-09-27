@@ -39,3 +39,25 @@ export async function guardarMovimiento(
     return false;
   }
 }
+
+export async function editarMovimiento(m: Movimiento): Promise<boolean> {
+  const body = {
+    id: m.id,
+    esIngreso: m.esIngreso,
+    monto: m.monto,
+    titulo: m.titulo,
+    detalle: m.detalle,
+    fecha: m.fecha,
+  };
+  try {
+    const res = await fetch(`${API_URL}/movimientos`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    return res.ok;
+  } catch (err) {
+    console.error("Error actualizando movimiento", m.id, err);
+    return false;
+  }
+}

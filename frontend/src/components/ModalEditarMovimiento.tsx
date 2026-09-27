@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import type { Dispatch, FormEvent, SetStateAction } from "react";
+import type { FormEvent } from "react";
 import type { Movimiento } from "../lib/types";
 import { hoyISO } from "../lib/utils";
-import { v4 as uuidv4 } from "uuid";
+import { editarMovimiento } from "../lib/movimientos";
 
 type Props = {
+  movimientoEditar: Movimiento;
   abierto: boolean;
   onCerrar: () => void;
-  setMovimientosArray: Dispatch<SetStateAction<Movimiento[]>>;
+  movimientosArray: Movimiento[];
 };
 
 type Errores = {
@@ -19,15 +20,16 @@ type Errores = {
 const campo =
   "mt-1 w-full rounded-lg border border-[#1E2B57]/25 bg-white/50 px-4 py-3 outline-none transition focus:border-[#1E2B57] focus-visible:ring-2 focus-visible:ring-[#1E2B57]/25 aria-[invalid=true]:border-[#C2334D]";
 
-export default function ModalMovimiento({
+export default function ModalEditarMovimiento({
+  movimientosArray,
+  movimientoEditar,
   abierto,
   onCerrar,
-  setMovimientosArray,
 }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
 
   const [tipo, setTipo] = useState<boolean>(false);
-  const [monto, setMonto] = useState("");
+  const [monto, setMonto] = useState(String(""));
   const [titulo, setTitulo] = useState("");
   const [descripcion, setDescripcion] = useState("");
   const [fecha, setFecha] = useState(hoyISO());
@@ -43,14 +45,15 @@ export default function ModalMovimiento({
     if (!abierto && dialogo.open) dialogo.close();
   }, [abierto]);
 
-  function reiniciar() {
-    setTipo(false);
-    setTitulo("");
-    setMonto("");
-    setDescripcion("");
-    setFecha(hoyISO());
-    setErrores({});
-  }
+  useEffect(() => {
+    if (movimientoEditar) {
+      setTipo(movimientoEditar.esIngreso);
+      setMonto(String(movimientoEditar.monto));
+      setTitulo(movimientoEditar.titulo);
+      setDescripcion(movimientoEditar.detalle);
+      setFecha(movimientoEditar.fecha);
+    }
+  }, [movimientoEditar]);
 
   function guardar(e: FormEvent) {
     e.preventDefault();
@@ -72,18 +75,19 @@ export default function ModalMovimiento({
       return;
     }
 
-    const nuevo: Movimiento = {
-      id: uuidv4(),
-      titulo: titulo,
-      esIngreso: tipo,
-      detalle: descripcion,
-      fecha: fecha,
-      monto: Number(monto),
-    };
+    const movimientoAEditar = movimientosArray.find(
+      (m) => m.id === movimientoEditar.id,
+    );
 
-    console.log("nuevo id:", nuevo.id);
+    if (movimientoAEditar) {
+      movimientoAEditar.esIngreso = movimientoAEditar.esIngreso;
+      movimientoAEditar.titulo = titulo;
+      movimientoAEditar.detalle = descripcion;
+      movimientoAEditar.fecha = fecha;
+      movimientoAEditar.monto = Number(monto);
+    }
 
-    setMovimientosArray((prev) => [nuevo, ...prev]);
+    editarMovimiento(movimientoAEditar);
     onCerrar();
   }
 
@@ -92,7 +96,6 @@ export default function ModalMovimiento({
       ref={ref}
       aria-labelledby="titulo-modal"
       onClose={() => {
-        reiniciar();
         onCerrar();
       }}
       onClick={(e) => {
@@ -103,7 +106,7 @@ export default function ModalMovimiento({
       <form noValidate className="flex flex-col gap-6 p-6" onSubmit={guardar}>
         <div className="flex items-center justify-between">
           <h2 id="titulo-modal" className="text-lg font-medium">
-            Agregar movimiento
+            Editar movimiento
           </h2>
           <button
             type="button"
@@ -260,7 +263,7 @@ export default function ModalMovimiento({
             type="submit"
             className="flex-[2] rounded-lg bg-[#1E2B57] px-5 py-3.5 font-medium text-[#F4F6F4] transition active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1E2B57]"
           >
-            Guardar movimiento
+            Actualizar movimiento
           </button>
         </div>
       </form>

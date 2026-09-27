@@ -6,6 +6,7 @@ import Monto from "../components/Balance";
 import Loading from "../components/Loading";
 import { useParams } from "react-router-dom";
 import NotFound from "../components/NotFound";
+import ModalEditarMovimiento from "../components/ModalEditarMovimiento";
 export const API_URL = import.meta.env.VITE_API_URL;
 
 export default function Cuenta() {
@@ -14,6 +15,7 @@ export default function Cuenta() {
   const [seEncontroCuenta, setSeEncontroCuenta] = useState(true);
   const [cargando, setCargando] = useState(false);
   const [movimientosArray, setMovimientosArray] = useState<Movimiento[]>([]);
+  const [movimientoEditar, setMovimientoEditar] = useState<Movimiento>();
 
   const obtenerCuenta = async () => {
     const respuesta = await fetch(`${API_URL}/${id}`);
@@ -43,6 +45,7 @@ export default function Cuenta() {
   }, []);
 
   const [modalAbierto, setModalAbierto] = useState(false);
+  const [mostrarModalEditarMov, setMostrarModalEditarMov] = useState(false);
 
   return (
     <>
@@ -59,13 +62,24 @@ export default function Cuenta() {
             setModalAbierto={setModalAbierto}
             setMovimientosArray={setMovimientosArray}
           />
-          <Movimientos movimientosArray={movimientosArray} />
+          <Movimientos
+            onAbrirModalEditarMov={() => setMostrarModalEditarMov(true)}
+            movimientosArray={movimientosArray}
+            setMovimientoEditar={setMovimientoEditar}
+          />
         </div>
 
         <ModalAgregarMovimiento
           abierto={modalAbierto}
           onCerrar={() => setModalAbierto(false)}
           setMovimientosArray={setMovimientosArray}
+        />
+
+        <ModalEditarMovimiento
+          movimientosArray={movimientosArray}
+          movimientoEditar={movimientoEditar}
+          abierto={mostrarModalEditarMov}
+          onCerrar={() => setMostrarModalEditarMov(false)}
         />
       </main>
     </>

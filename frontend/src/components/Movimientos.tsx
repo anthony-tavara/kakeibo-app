@@ -1,14 +1,21 @@
 import { useState } from "react";
 import type { Movimiento } from "../lib/types";
 import { ars, formatearFecha } from "../lib/utils";
+import { SquarePen, Trash2 } from "lucide-react";
 
 const VISIBLES = 6;
 
 type Props = {
+  onAbrirModalEditarMov: () => void;
   movimientosArray: Movimiento[];
+  setMovimientoEditar: React.Dispatch<React.SetStateAction<Movimiento>>;
 };
 
-export default function Movimientos({ movimientosArray }: Props) {
+export default function Movimientos({
+  setMovimientoEditar,
+  onAbrirModalEditarMov,
+  movimientosArray,
+}: Props) {
   const [verTodos, setVerTodos] = useState(false);
 
   const ordenados = [...movimientosArray].sort(
@@ -51,12 +58,32 @@ export default function Movimientos({ movimientosArray }: Props) {
                   <p className="font-medium">{m.titulo}</p>
                   <p className="text-sm text-[#1E2B57]/70">{m.detalle}</p>
                 </div>
-                <p
-                  className={`font-medium ${m.esIngreso ? "text-[#2E7D55]" : ""}`}
-                >
-                  {m.esIngreso ? "+" : "−"}
-                  {ars.format(Math.abs(m.monto))}
-                </p>
+                <div className="text-end">
+                  <p
+                    className={`font-medium ${m.esIngreso ? "text-[#2E7D55]" : ""}`}
+                  >
+                    {m.esIngreso ? "+" : "−"}
+                    {ars.format(Math.abs(m.monto))}
+                  </p>
+                  <button
+                    onClick={() => {
+                      setMovimientoEditar(m)
+                      onAbrirModalEditarMov()
+                    }}
+                    type="button"
+                    aria-label="Editar movimiento"
+                    className="rounded-lg mr-4 text-[#1E2B57]/60 transition hover:text-[#1E2B57] cursor-pointer"
+                  >
+                    <SquarePen className="size-4" strokeWidth={2} />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Eliminar movimiento"
+                    className="rounded-lg  text-[#C2334D]/70 transition hover:text-[#C2334D] cursor-pointer"
+                  >
+                    <Trash2 className="size-4" strokeWidth={2} />
+                  </button>
+                </div>
               </li>
             );
           })}
