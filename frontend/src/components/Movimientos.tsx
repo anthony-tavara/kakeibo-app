@@ -8,7 +8,7 @@ const VISIBLES = 6;
 type Props = {
   onAbrirModalEditarMov: () => void;
   movimientosArray: Movimiento[];
-  setMovimientoEditar: React.Dispatch<React.SetStateAction<Movimiento>>;
+  setMovimientoEditar: React.Dispatch<React.SetStateAction<Movimiento | undefined>>;
 };
 
 export default function Movimientos({
