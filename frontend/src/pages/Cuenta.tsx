@@ -13,36 +13,35 @@ export default function Cuenta() {
   const { id } = useParams<{ id: string }>();
   const [cuenta, setCuenta] = useState<Cuenta>({ id: "", nombre: "" });
   const [seEncontroCuenta, setSeEncontroCuenta] = useState(true);
-  const [cargando, setCargando] = useState(false);
+  const [cargando, setCargando] = useState(true);
   const [movimientosArray, setMovimientosArray] = useState<Movimiento[]>([]);
   const [movimientoEditar, setMovimientoEditar] = useState<Movimiento>();
 
-  const obtenerCuenta = async () => {
-    const respuesta = await fetch(`${API_URL}/${id}`);
-    const datos = await respuesta.json();
-    if (!datos?.[0]) {
-      setSeEncontroCuenta(false);
-      return;
-    }
-    setCuenta(datos[0]);
-    return datos;
-  };
-
-  const obtenerMovimientos = async () => {
-    try {
-      const respuesta = await fetch(`${API_URL}/${id}/movimientos`);
-      const datos = await respuesta.json();
-      setMovimientosArray(datos);
-    } finally {
-      setCargando(false);
-    }
-  };
-
   useEffect(() => {
-    setCargando(true);
+    const obtenerCuenta = async () => {
+      const respuesta = await fetch(`${API_URL}/${id}`);
+      const datos = await respuesta.json();
+      if (!datos?.[0]) {
+        setSeEncontroCuenta(false);
+        return;
+      }
+      setCuenta(datos[0]);
+      return datos;
+    };
+
+    const obtenerMovimientos = async () => {
+      try {
+        const respuesta = await fetch(`${API_URL}/${id}/movimientos`);
+        const datos = await respuesta.json();
+        setMovimientosArray(datos);
+      } finally {
+        setCargando(false);
+      }
+    };
+
     obtenerCuenta();
     obtenerMovimientos();
-  }, []);
+  }, [id]);
 
   const [modalAbierto, setModalAbierto] = useState(false);
   const [mostrarModalEditarMov, setMostrarModalEditarMov] = useState(false);
@@ -75,12 +74,14 @@ export default function Cuenta() {
           setMovimientosArray={setMovimientosArray}
         />
 
-        <ModalEditarMovimiento
-          movimientosArray={movimientosArray}
-          movimientoEditar={movimientoEditar}
-          abierto={mostrarModalEditarMov}
-          onCerrar={() => setMostrarModalEditarMov(false)}
-        />
+        {movimientoEditar && (
+          <ModalEditarMovimiento
+            movimientosArray={movimientosArray}
+            movimientoEditar={movimientoEditar}
+            abierto={mostrarModalEditarMov}
+            onCerrar={() => setMostrarModalEditarMov(false)}
+          />
+        )}
       </main>
     </>
   );

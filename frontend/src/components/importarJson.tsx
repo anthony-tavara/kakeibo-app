@@ -6,7 +6,9 @@ interface ImportarJsonProps {
   setMovimientosArray: React.Dispatch<React.SetStateAction<Movimiento[]>>;
 }
 
-export default function ImportarJson({ setMovimientosArray }: ImportarJsonProps) {
+export default function ImportarJson({
+  setMovimientosArray,
+}: ImportarJsonProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -19,7 +21,7 @@ export default function ImportarJson({ setMovimientosArray }: ImportarJsonProps)
         const data = JSON.parse(event.target?.result as string);
 
         if (!Array.isArray(data)) {
-          alert("El archivo no contiene un array de movimientos.");
+          console.error("El archivo no contiene un array de movimientos.")
           return;
         }
 
@@ -36,7 +38,7 @@ export default function ImportarJson({ setMovimientosArray }: ImportarJsonProps)
           return [...prev, ...nuevos];
         });
       } catch (err) {
-        alert("El archivo no es un JSON válido.");
+        console.error("Error al parsear JSON:", err);
       } finally {
         if (inputRef.current) inputRef.current.value = "";
       }

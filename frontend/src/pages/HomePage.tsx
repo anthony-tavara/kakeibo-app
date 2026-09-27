@@ -11,13 +11,13 @@ function inicial(nombre: string) {
 export default function HomePage() {
   const [cuentas, setCuentas] = useState<Cuenta[]>([]);
 
-  const obtenerCuentas = async () => {
-    const respuesta = await fetch(`${API_URL}/cuentas`);
-    const data = await respuesta.json();
-    setCuentas(data);
-  };
-
   useEffect(() => {
+    const obtenerCuentas = async () => {
+      const respuesta = await fetch(`${API_URL}/cuentas`);
+      const data = await respuesta.json();
+      setCuentas(data);
+    };
+
     obtenerCuentas();
   }, []);
 
