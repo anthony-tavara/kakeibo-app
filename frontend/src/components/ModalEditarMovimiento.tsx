@@ -3,6 +3,7 @@ import type { Movimiento } from "../lib/types";
 import FormEditarMovimiento from "./FormEditarMovimiento";
 
 type Props = {
+  cuentaId: string;
   movimientoEditar: Movimiento;
   abierto: boolean;
   onCerrar: () => void;
@@ -10,6 +11,7 @@ type Props = {
 };
 
 export default function ModalEditarMovimiento({
+  cuentaId,
   movimientosArray,
   movimientoEditar,
   abierto,
@@ -41,6 +43,7 @@ export default function ModalEditarMovimiento({
     >
       <FormEditarMovimiento
         key={movimientoEditar.id}
+        cuentaId={cuentaId}
         movimientoEditar={movimientoEditar}
         movimientosArray={movimientosArray}
         onCerrar={onCerrar}

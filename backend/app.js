@@ -24,12 +24,12 @@ app.get("/cuentas", async (req, res) => {
   }
 });
 
-app.get("/:id", async (req, res) => {
-  const id = req.params.id;
+app.get("/cuentas/:cuentaId", async (req, res) => {
+  const cuentaId = req.params.cuentaId;
 
   try {
     const { rows } = await pool.query("SELECT * FROM cuenta c WHERE id = $1", [
-      id,
+      cuentaId,
     ]);
 
     if (rows === 0) {
@@ -44,8 +44,8 @@ app.get("/:id", async (req, res) => {
   }
 });
 
-app.get("/:id/movimientos", async (req, res) => {
-  const id = req.params.id;
+app.get("/cuentas/:cuentaId/movimientos", async (req, res) => {
+  const cuentaId = req.params.cuentaId;
   try {
     const { rows } = await pool.query(
       `        
@@ -60,7 +60,7 @@ app.get("/:id/movimientos", async (req, res) => {
          from movimientos m
          where cuenta_id = $1
         order by fecha desc, created_at desc`,
-      [id],
+      [cuentaId],
     );
     res.json(rows);
   } catch (err) {
@@ -84,8 +84,8 @@ function validarMovimiento(body) {
   return null;
 }
 
-app.post("/:id/movimientos", async (req, res) => {
-  const cuentaId = Number(req.params.id);
+app.post("/cuentas/:cuentaId/movimientos", async (req, res) => {
+  const cuentaId = Number(req.params.cuentaId);
   if (!Number.isInteger(cuentaId)) {
     return res.status(400).json({ error: "cuentaId inválido" });
   }
@@ -117,7 +117,7 @@ app.post("/:id/movimientos", async (req, res) => {
   }
 });
 
-app.put("/movimientos", async (req, res) => {
+app.put("/cuentas/:cuentaId/movimientos", async (req, res) => {
   const error = validarMovimiento(req.body);
   if (error) {
     return res.status(400).json({ error });

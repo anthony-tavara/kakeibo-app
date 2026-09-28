@@ -13,12 +13,14 @@ const campo =
   "mt-1 w-full rounded-lg border border-[#1E2B57]/25 bg-white/50 px-4 py-3 outline-none transition focus:border-[#1E2B57] focus-visible:ring-2 focus-visible:ring-[#1E2B57]/25 aria-[invalid=true]:border-[#C2334D]";
 
 type Props = {
+  cuentaId: string;
   movimientoEditar: Movimiento;
   movimientosArray: Movimiento[];
   onCerrar: () => void;
 };
 
 export default function FormEditarMovimiento({
+  cuentaId,
   movimientoEditar,
   movimientosArray,
   onCerrar,
@@ -63,7 +65,7 @@ export default function FormEditarMovimiento({
       movimientoAEditar.fecha = fecha;
       movimientoAEditar.monto = Number(monto);
 
-      editarMovimiento(movimientoAEditar);
+      editarMovimiento(cuentaId, movimientoAEditar);
       onCerrar();
     } else {
       console.error("No se encontró el movimiento a editar");

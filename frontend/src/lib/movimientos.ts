@@ -28,7 +28,7 @@ export async function guardarMovimiento(
     cuenta_id: cuentaId,
   };
   try {
-    const res = await fetch(`${API_URL}/${cuentaId}/movimientos`, {
+    const res = await fetch(`${API_URL}/cuentas/${cuentaId}/movimientos`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
@@ -40,7 +40,7 @@ export async function guardarMovimiento(
   }
 }
 
-export async function editarMovimiento(m: Movimiento): Promise<boolean> {
+export async function editarMovimiento(cuentaId, m: Movimiento): Promise<boolean> {
   const body = {
     id: m.id,
     esIngreso: m.esIngreso,
@@ -50,7 +50,7 @@ export async function editarMovimiento(m: Movimiento): Promise<boolean> {
     fecha: m.fecha,
   };
   try {
-    const res = await fetch(`${API_URL}/movimientos`, {
+    const res = await fetch(`${API_URL}/cuentas/${cuentaId}/movimientos`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),

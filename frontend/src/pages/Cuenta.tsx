@@ -25,7 +25,7 @@ export default function Cuenta() {
 
   useEffect(() => {
     const obtenerCuenta = async () => {
-      const respuesta = await fetch(`${API_URL}/${id}`);
+      const respuesta = await fetch(`${API_URL}/cuentas/${id}`);
       const datos = await respuesta.json();
       if (!datos?.[0]) {
         setSeEncontroCuenta(false);
@@ -37,7 +37,7 @@ export default function Cuenta() {
 
     const obtenerMovimientos = async () => {
       try {
-        const respuesta = await fetch(`${API_URL}/${id}/movimientos`);
+        const respuesta = await fetch(`${API_URL}/cuentas/${id}/movimientos`);
         const datos = await respuesta.json();
         setMovimientosArray(datos);
       } finally {
@@ -85,6 +85,7 @@ export default function Cuenta() {
 
         {movimientoEditar && (
           <ModalEditarMovimiento
+            cuentaId={cuenta.id}
             movimientosArray={movimientosArray}
             movimientoEditar={movimientoEditar}
             abierto={mostrarModalEditarMov}
