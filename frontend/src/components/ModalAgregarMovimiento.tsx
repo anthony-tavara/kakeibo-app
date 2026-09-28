@@ -3,8 +3,10 @@ import type { Dispatch, FormEvent, SetStateAction } from "react";
 import type { Movimiento } from "../lib/types";
 import { hoyISO } from "../lib/utils";
 import { v4 as uuidv4 } from "uuid";
+import { guardarMovimiento } from "../lib/movimientos";
 
 type Props = {
+  cuentaId: string;
   abierto: boolean;
   onCerrar: () => void;
   setMovimientosArray: Dispatch<SetStateAction<Movimiento[]>>;
@@ -20,6 +22,7 @@ const campo =
   "mt-1 w-full rounded-lg border border-[#1E2B57]/25 bg-white/50 px-4 py-3 outline-none transition focus:border-[#1E2B57] focus-visible:ring-2 focus-visible:ring-[#1E2B57]/25 aria-[invalid=true]:border-[#C2334D]";
 
 export default function ModalMovimiento({
+  cuentaId,
   abierto,
   onCerrar,
   setMovimientosArray,
@@ -84,6 +87,7 @@ export default function ModalMovimiento({
     console.log("nuevo id:", nuevo.id);
 
     setMovimientosArray((prev) => [nuevo, ...prev]);
+    guardarMovimiento(cuentaId, nuevo);
     onCerrar();
   }
 

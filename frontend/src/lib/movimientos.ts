@@ -40,7 +40,10 @@ export async function guardarMovimiento(
   }
 }
 
-export async function editarMovimiento(cuentaId, m: Movimiento): Promise<boolean> {
+export async function editarMovimiento(
+  cuentaId: string,
+  m: Movimiento,
+): Promise<boolean> {
   const body = {
     id: m.id,
     esIngreso: m.esIngreso,

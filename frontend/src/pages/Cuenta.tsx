@@ -78,6 +78,7 @@ export default function Cuenta() {
         </div>
 
         <ModalAgregarMovimiento
+          cuentaId={cuenta.id}
           abierto={modalAbierto}
           onCerrar={() => setModalAbierto(false)}
           setMovimientosArray={setMovimientosArray}
