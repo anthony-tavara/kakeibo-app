@@ -46,3 +46,12 @@ export async function importarJson(file: File) {
   const validos = movimientos.filter(esMovimientoValido);
   return { validos, cantidadInvalidos: movimientos.length - validos.length };
 }
+
+export async function importarArchivo(file: File) {
+  const extension = file.name.split(".").pop()?.toLowerCase();
+
+  if (extension === "csv") return await importarCsv(file);
+  if (extension === "json") return await importarJson(file);
+
+  throw new Error("Formato no soportado. Usá .csv o .json");
+}

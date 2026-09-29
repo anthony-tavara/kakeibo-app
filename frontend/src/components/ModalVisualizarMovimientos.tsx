@@ -61,8 +61,8 @@ export default function ModalVisualizarMovimientos({
           </button>
         </div>
 
-        {movimientos?.map((movimiento) => {
-          return (
+        <ul className="max-h-[50vh] overflow-y-auto pr-2">
+          {movimientos.map((movimiento) => (
             <li
               key={movimiento.id}
               className="grid grid-cols-[3.5rem_1fr_auto] items-baseline gap-3 border-b border-[#1E2B57]/10 py-4 last:border-b-0"
@@ -85,8 +85,8 @@ export default function ModalVisualizarMovimientos({
                 </p>
               </div>
             </li>
-          );
-        })}
+          ))}
+        </ul>
 
         <div className="flex gap-3">
           <button

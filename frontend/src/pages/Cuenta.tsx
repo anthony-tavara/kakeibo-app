@@ -63,7 +63,6 @@ export default function Cuenta() {
         <div className="mx-auto flex w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-14 px-6 py-10 sm:py-16">
           <Monto
             cuenta={cuenta}
-            setCargando={setCargando}
             movimientosArray={movimientosArray}
             setModalAbierto={setModalAbierto}
             setMovimientosArray={setMovimientosArray}

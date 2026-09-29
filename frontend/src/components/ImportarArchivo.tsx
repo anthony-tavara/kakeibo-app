@@ -1,29 +1,29 @@
 import { useRef, useState } from "react";
 import type { Movimiento } from "../lib/types";
-import ModalVisualizarMovimientos from "./ModalVisualizarMovimientos";
-import { importarCsv } from "../lib/importarArchivos";
 import { guardarMovimiento } from "../lib/movimientos";
+import { importarArchivo } from "../lib/importarArchivos";
+import ModalVisualizarMovimientos from "./ModalVisualizarMovimientos";
 
-interface ImportarJsonProps {
+type Props = {
   setMovimientosArray: React.Dispatch<React.SetStateAction<Movimiento[]>>;
   cuentaId: string;
-}
+};
 
-export default function ImportarCsv({
-  cuentaId,
+export default function ImportarArchivo({
   setMovimientosArray,
-}: ImportarJsonProps) {
+  cuentaId,
+}: Props) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const [modalAbierto, setModalAbierto] = useState(false);
   const [nuevosMovimientos, setNuevosMovimientos] = useState<Movimiento[]>();
-
-  const inputRef = useRef<HTMLInputElement>(null);
 
   async function handleArchivo(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
 
     try {
-      const { validos, cantidadInvalidos } = await importarCsv(file);
+      const { validos, cantidadInvalidos } = await importarArchivo(file);
 
       if (cantidadInvalidos > 0) {
         alert(
@@ -34,7 +34,9 @@ export default function ImportarCsv({
       setNuevosMovimientos(validos);
       setModalAbierto(true);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Error al leer el CSV.");
+      alert(
+        err instanceof Error ? err.message : "Error al importar el archivo.",
+      );
     } finally {
       e.target.value = "";
     }
@@ -45,28 +47,30 @@ export default function ImportarCsv({
       <input
         ref={inputRef}
         type="file"
-        accept=".csv"
+        accept=".csv,.json,text/csv,application/json"
         onChange={handleArchivo}
         className="hidden"
-        id="import-csv"
+        id="import-file"
       />
       <label
-        htmlFor="import-csv"
+        htmlFor="import-file"
         className="cursor-pointer text-center flex-1 rounded-lg bg-[#E8EEF0] border border-[#1E2B57]/20 px-5 py-3.5 font-medium text-[#1E2B57] transition active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1E2B57]"
       >
-        Importar Csv
+        Importar Archivo (.csv o .json)
       </label>
 
-      <ModalVisualizarMovimientos
-        abierto={modalAbierto}
-        movimientos={nuevosMovimientos}
-        onCerrar={() => setModalAbierto(false)}
-        onConfirmar={() => {
-          setMovimientosArray((prev) => [...prev, ...nuevosMovimientos]);
-          for (const m of nuevosMovimientos) guardarMovimiento(cuentaId, m);
-          setModalAbierto(false);
-        }}
-      />
+      {nuevosMovimientos && (
+        <ModalVisualizarMovimientos
+          abierto={modalAbierto}
+          movimientos={nuevosMovimientos}
+          onCerrar={() => setModalAbierto(false)}
+          onConfirmar={() => {
+            setMovimientosArray((prev) => [...prev, ...nuevosMovimientos]);
+            for (const m of nuevosMovimientos) guardarMovimiento(cuentaId, m);
+            setModalAbierto(false);
+          }}
+        />
+      )}
     </>
   );
 }

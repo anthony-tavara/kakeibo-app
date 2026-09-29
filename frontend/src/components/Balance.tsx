@@ -1,12 +1,9 @@
 import type { Movimiento, Cuenta } from "../lib/types";
 import { ars } from "../lib/utils";
-import GuardarMovimientos from "./GuardarMovimientos";
-import ImportarCsv from "./ImportarCsv";
-import ImportarJson from "./importarJson";
+import ImportarArchivo from "./ImportarArchivo";
 
 interface MontoProps {
   cuenta: Cuenta;
-  setCargando: React.Dispatch<React.SetStateAction<boolean>>;
   movimientosArray: Movimiento[];
   setMovimientosArray: React.Dispatch<React.SetStateAction<Movimiento[]>>;
   setModalAbierto: React.Dispatch<React.SetStateAction<boolean>>;
@@ -14,7 +11,6 @@ interface MontoProps {
 
 export default function Balance({
   cuenta,
-  setCargando,
   movimientosArray,
   setModalAbierto,
   setMovimientosArray,
@@ -102,18 +98,9 @@ export default function Balance({
           Agregar Movimiento
         </button>
         <div className="flex gap-2">
-          <ImportarJson
+          <ImportarArchivo
             cuentaId={cuenta.id}
             setMovimientosArray={setMovimientosArray}
-          />
-          <ImportarCsv
-            cuentaId={cuenta.id}
-            setMovimientosArray={setMovimientosArray}
-          />
-          <GuardarMovimientos
-            cuentaId={cuenta.id}
-            movimientosArray={movimientosArray}
-            setCargando={setCargando}
           />
         </div>
       </div>
