@@ -69,12 +69,10 @@ export async function eliminarMovimiento(
   cuentaId: string,
   movimientoId: string,
 ): Promise<boolean> {
-  const body = { id: movimientoId };
   try {
-    const res = await fetch(`${API_URL}/cuentas/${cuentaId}/movimientos`, {
+    const res = await fetch(`${API_URL}/cuentas/${cuentaId}/movimientos/${movimientoId}`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
     });
     return res.ok;
   } catch (err) {

@@ -1,0 +1,72 @@
+import { useRef, useState } from "react";
+import type { Movimiento } from "../lib/types";
+import ModalVisualizarMovimientos from "./ModalVisualizarMovimientos";
+import { importarCsv } from "../lib/importarArchivos";
+import { guardarMovimiento } from "../lib/movimientos";
+
+interface ImportarJsonProps {
+  setMovimientosArray: React.Dispatch<React.SetStateAction<Movimiento[]>>;
+  cuentaId: string;
+}
+
+export default function ImportarCsv({
+  cuentaId,
+  setMovimientosArray,
+}: ImportarJsonProps) {
+  const [modalAbierto, setModalAbierto] = useState(false);
+  const [nuevosMovimientos, setNuevosMovimientos] = useState<Movimiento[]>();
+
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  async function handleArchivo(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const { validos, cantidadInvalidos } = await importarCsv(file);
+
+      if (cantidadInvalidos > 0) {
+        alert(
+          `${cantidadInvalidos} movimiento(s) inválido(s) fueron ignorados.`,
+        );
+      }
+
+      setNuevosMovimientos(validos);
+      setModalAbierto(true);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Error al leer el CSV.");
+    } finally {
+      e.target.value = "";
+    }
+  }
+
+  return (
+    <>
+      <input
+        ref={inputRef}
+        type="file"
+        accept=".csv"
+        onChange={handleArchivo}
+        className="hidden"
+        id="import-csv"
+      />
+      <label
+        htmlFor="import-csv"
+        className="cursor-pointer text-center flex-1 rounded-lg bg-[#E8EEF0] border border-[#1E2B57]/20 px-5 py-3.5 font-medium text-[#1E2B57] transition active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1E2B57]"
+      >
+        Importar Csv
+      </label>
+
+      <ModalVisualizarMovimientos
+        abierto={modalAbierto}
+        movimientos={nuevosMovimientos}
+        onCerrar={() => setModalAbierto(false)}
+        onConfirmar={() => {
+          setMovimientosArray((prev) => [...prev, ...nuevosMovimientos]);
+          for (const m of nuevosMovimientos) guardarMovimiento(cuentaId, m);
+          setModalAbierto(false);
+        }}
+      />
+    </>
+  );
+}

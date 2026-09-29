@@ -32,7 +32,7 @@ app.get("/cuentas/:cuentaId", async (req, res) => {
       cuentaId,
     ]);
 
-    if (rows === 0) {
+    if (rows.length === 0) {
       return res.status(404).json({
         error: `No existe una cuenta con id ${id}`,
       });
@@ -72,8 +72,7 @@ app.get("/cuentas/:cuentaId/movimientos", async (req, res) => {
 });
 
 function validarMovimiento(body) {
-  const { id, esIngreso, monto, titulo, fecha } = body;
-  if (typeof id !== "string" || id.length === 0) return "id inválido";
+  const { esIngreso, monto, titulo, fecha } = body; // sin id
   if (typeof esIngreso !== "boolean") return "esIngreso inválido";
   if (typeof monto !== "number" || !Number.isFinite(monto))
     return "monto inválido";
@@ -91,24 +90,17 @@ app.post("/cuentas/:cuentaId/movimientos", async (req, res) => {
   }
 
   const error = validarMovimiento(req.body);
-  if (error) {
-    return res.status(400).json({ error });
-  }
+  if (error) return res.status(400).json({ error });
 
-  const { id, esIngreso, monto, titulo, detalle, fecha } = req.body;
+  const { esIngreso, monto, titulo, detalle, fecha } = req.body;
 
   try {
     const { rows } = await pool.query(
-      `insert into movimientos (id, esIngreso, monto, titulo, detalle, fecha, cuenta_id)
-       values ($1, $2, $3, $4, $5, $6, $7)
-       on conflict (id) do nothing
+      `insert into movimientos (esIngreso, monto, titulo, detalle, fecha, cuenta_id)
+       values ($1, $2, $3, $4, $5, $6)
        returning id, esIngreso as "esIngreso", monto::float8 as monto, titulo, detalle, fecha::text as fecha`,
-      [id, esIngreso, monto, titulo.trim(), detalle ?? "", fecha, cuentaId],
+      [esIngreso, monto, titulo.trim(), detalle ?? "", fecha, cuentaId],
     );
-
-    if (rows.length === 0) {
-      return res.status(200).json({ id, yaExistia: true });
-    }
 
     res.status(201).json(rows[0]);
   } catch (err) {
@@ -117,8 +109,16 @@ app.post("/cuentas/:cuentaId/movimientos", async (req, res) => {
   }
 });
 
+function validarMovimientoConId(body) {
+  const { id } = body;
+  if (typeof id !== "string" || id.length === 0) return "id inválido";
+  return validarMovimiento(body);
+}
+
 app.put("/cuentas/:cuentaId/movimientos", async (req, res) => {
-  const error = validarMovimiento(req.body);
+  const { cuentaId } = req.params;
+
+  const error = validarMovimientoConId(req.body);
   if (error) {
     return res.status(400).json({ error });
   }
@@ -126,40 +126,35 @@ app.put("/cuentas/:cuentaId/movimientos", async (req, res) => {
   const { id, esIngreso, monto, titulo, detalle, fecha } = req.body;
 
   try {
-    const { rows } = await pool.query(
+    const { rows, rowCount } = await pool.query(
       `
-      update movimientos
-      set esingreso=$2, monto=$3, titulo=$4, detalle=$5, fecha=$6
-      where id=$1
-      `,
-      [id, esIngreso, monto, titulo.trim(), detalle ?? "", fecha],
+  update movimientos
+  set esingreso=$2, monto=$3, titulo=$4, detalle=$5, fecha=$6
+  where id=$1 and cuenta_id=$7
+  returning id, esIngreso as "esIngreso", monto::float8 as monto, titulo, detalle, fecha::text as fecha
+  `,
+      [id, esIngreso, monto, titulo.trim(), detalle ?? "", fecha, cuentaId],
     );
 
-    res.status(201).json(rows[0]);
+    if (rowCount === 0) {
+      return res.status(404).json({ error: "Movimiento no encontrado" });
+    }
+
+    res.status(200).json(rows[0]);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "No se pudo actualizar el movimiento" });
   }
 });
 
-function validarId(body) {
-  const { id } = body;
-  if (typeof id !== "string" || id.length === 0) return "id inválido";
-  return null;
-}
+app.delete("/cuentas/:cuentaId/movimientos/:id", async (req, res) => {
+  const { cuentaId, id } = req.params;
 
-app.delete("/cuentas/:cuentaId/movimientos/", async (req, res) => {
-  const cuentaId = Number(req.params.cuentaId);
-  if (!Number.isInteger(cuentaId)) {
+  if (!Number.isInteger(Number(cuentaId)))
     return res.status(400).json({ error: "cuentaId inválido" });
-  }
 
-  const error = validarId(req.body);
-  if (error) {
-    return res.status(400).json({ error });
-  }
-
-  const { id } = req.body;
+  if (typeof id !== "string" || id.length === 0)
+    return res.status(400).json({ error: "id de movimiento inválido" });
 
   try {
     const cuentaExiste = await pool.query(

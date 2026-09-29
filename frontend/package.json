@@ -13,6 +13,7 @@
     "@neondatabase/neon-js": "^0.7.0-beta",
     "@tailwindcss/vite": "^4.3.3",
     "lucide-react": "^1.48.0",
+    "papaparse": "^5.7.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.4",
@@ -21,6 +22,7 @@
   },
   "devDependencies": {
     "@types/node": "^24.13.3",
+    "@types/papaparse": "^5.5.2",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",

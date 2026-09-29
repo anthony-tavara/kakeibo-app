@@ -1,6 +1,7 @@
 import type { Movimiento, Cuenta } from "../lib/types";
 import { ars } from "../lib/utils";
 import GuardarMovimientos from "./GuardarMovimientos";
+import ImportarCsv from "./ImportarCsv";
 import ImportarJson from "./importarJson";
 
 interface MontoProps {
@@ -102,6 +103,7 @@ export default function Balance({
         </button>
         <div className="flex gap-2">
           <ImportarJson setMovimientosArray={setMovimientosArray} />
+          <ImportarCsv cuentaId={cuenta.id} setMovimientosArray={setMovimientosArray} />
           <GuardarMovimientos
             cuentaId={cuenta.id}
             movimientosArray={movimientosArray}
