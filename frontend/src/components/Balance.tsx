@@ -102,8 +102,14 @@ export default function Balance({
           Agregar Movimiento
         </button>
         <div className="flex gap-2">
-          <ImportarJson setMovimientosArray={setMovimientosArray} />
-          <ImportarCsv cuentaId={cuenta.id} setMovimientosArray={setMovimientosArray} />
+          <ImportarJson
+            cuentaId={cuenta.id}
+            setMovimientosArray={setMovimientosArray}
+          />
+          <ImportarCsv
+            cuentaId={cuenta.id}
+            setMovimientosArray={setMovimientosArray}
+          />
           <GuardarMovimientos
             cuentaId={cuenta.id}
             movimientosArray={movimientosArray}

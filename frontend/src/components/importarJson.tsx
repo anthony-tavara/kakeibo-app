@@ -1,50 +1,43 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import type { Movimiento } from "../lib/types";
-import { esMovimientoValido } from "../lib/movimientos";
+import { guardarMovimiento } from "../lib/movimientos";
+import { importarJson } from "../lib/importarArchivos";
+import ModalVisualizarMovimientos from "./ModalVisualizarMovimientos";
 
-interface ImportarJsonProps {
+type Props = {
   setMovimientosArray: React.Dispatch<React.SetStateAction<Movimiento[]>>;
-}
+  cuentaId: string;
+};
 
-export default function ImportarJson({
-  setMovimientosArray,
-}: ImportarJsonProps) {
+export default function ImportarJson({ setMovimientosArray, cuentaId }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [modalAbierto, setModalAbierto] = useState(false);
+  const [nuevosMovimientos, setNuevosMovimientos] = useState<Movimiento[]>();
+
+  async function handleArchivo(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const data = JSON.parse(event.target?.result as string);
+    try {
+      const { validos, cantidadInvalidos } = await importarJson(file);
 
-        if (!Array.isArray(data)) {
-          console.error("El archivo no contiene un array de movimientos.")
-          return;
-        }
+      console.log(validos, cantidadInvalidos);
 
-        const validos = data.filter(esMovimientoValido);
-        const invalidos = data.length - validos.length;
-
-        if (invalidos > 0) {
-          alert(`${invalidos} movimiento(s) inválido(s) fueron ignorados.`);
-        }
-
-        setMovimientosArray((prev) => {
-          const idsExistentes = new Set(prev.map((m) => m.id));
-          const nuevos = validos.filter((m) => !idsExistentes.has(m.id));
-          return [...prev, ...nuevos];
-        });
-      } catch (err) {
-        console.error("Error al parsear JSON:", err);
-      } finally {
-        if (inputRef.current) inputRef.current.value = "";
+      if (cantidadInvalidos > 0) {
+        alert(
+          `${cantidadInvalidos} movimiento(s) inválido(s) fueron ignorados.`,
+        );
       }
-    };
-    reader.readAsText(file);
-  };
+
+      setNuevosMovimientos(validos);
+      setModalAbierto(true);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Error al leer el JSON.");
+    } finally {
+      e.target.value = "";
+    }
+  }
 
   return (
     <>
@@ -52,7 +45,7 @@ export default function ImportarJson({
         ref={inputRef}
         type="file"
         accept="application/json"
-        onChange={handleFile}
+        onChange={handleArchivo}
         className="hidden"
         id="import-json"
       />
@@ -62,6 +55,17 @@ export default function ImportarJson({
       >
         Importar JSON
       </label>
+
+      <ModalVisualizarMovimientos
+        abierto={modalAbierto}
+        movimientos={nuevosMovimientos}
+        onCerrar={() => setModalAbierto(false)}
+        onConfirmar={() => {
+          setMovimientosArray((prev) => [...prev, ...nuevosMovimientos]);
+          for (const m of nuevosMovimientos) guardarMovimiento(cuentaId, m);
+          setModalAbierto(false);
+        }}
+      />
     </>
   );
 }

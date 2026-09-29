@@ -38,3 +38,11 @@ export async function importarCsv(file: File) {
   const validos = movimientos.filter(esMovimientoValido);
   return { validos, cantidadInvalidos: movimientos.length - validos.length };
 }
+
+export async function importarJson(file: File) {
+  const texto = await file.text();
+  const movimientos = JSON.parse(texto);
+
+  const validos = movimientos.filter(esMovimientoValido);
+  return { validos, cantidadInvalidos: movimientos.length - validos.length };
+}
