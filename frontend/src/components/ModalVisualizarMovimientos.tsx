@@ -1,15 +1,17 @@
 import { useEffect, useRef } from "react";
-import type { Movimiento } from "../lib/types";
+import type { NuevoMovimiento } from "../lib/types";
 import { ars, formatearFecha } from "../lib/utils";
 
 type Props = {
+  guardando: boolean;
   abierto: boolean;
-  movimientos: Movimiento[];
+  movimientos: NuevoMovimiento[];
   onCerrar: () => void;
   onConfirmar: () => void;
 };
 
 export default function ModalVisualizarMovimientos({
+  guardando,
   abierto,
   movimientos,
   onCerrar,
@@ -20,19 +22,24 @@ export default function ModalVisualizarMovimientos({
   useEffect(() => {
     const dialogo = ref.current;
     if (!dialogo) return;
-    if (abierto && !dialogo.open) {
-      dialogo.showModal();
-    }
+    if (abierto && !dialogo.open) dialogo.showModal();
     if (!abierto && dialogo.open) dialogo.close();
   }, [abierto]);
+
+  function cerrar() {
+    if (!guardando) onCerrar();
+  }
 
   return (
     <dialog
       ref={ref}
       aria-labelledby="titulo-modal-movimientos"
+      onCancel={(e) => {
+        if (guardando) e.preventDefault();
+      }}
       onClose={onCerrar}
       onClick={(e) => {
-        if (e.target === e.currentTarget) onCerrar();
+        if (e.target === e.currentTarget) cerrar();
       }}
       className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl bg-[#E8EEF0] p-0 text-[#1E2B57] shadow-2xl backdrop:bg-[#1E2B57]/40"
     >
@@ -43,9 +50,10 @@ export default function ModalVisualizarMovimientos({
           </h2>
           <button
             type="button"
-            onClick={onCerrar}
+            onClick={cerrar}
+            disabled={guardando}
             aria-label="Cerrar"
-            className="-mr-2 rounded-lg p-2 transition hover:bg-[#1E2B57]/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1E2B57]"
+            className="-mr-2 rounded-lg p-2 transition hover:bg-[#1E2B57]/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1E2B57] disabled:opacity-50"
           >
             <svg
               viewBox="0 0 24 24"
@@ -62,9 +70,9 @@ export default function ModalVisualizarMovimientos({
         </div>
 
         <ul className="max-h-[50vh] overflow-y-auto pr-2">
-          {movimientos.map((movimiento) => (
+          {movimientos.map((movimiento, indice) => (
             <li
-              key={movimiento.id}
+              key={indice}
               className="grid grid-cols-[3.5rem_1fr_auto] items-baseline gap-3 border-b border-[#1E2B57]/10 py-4 last:border-b-0"
             >
               <span className="text-sm text-[#1E2B57]/70">
@@ -91,17 +99,19 @@ export default function ModalVisualizarMovimientos({
         <div className="flex gap-3">
           <button
             type="button"
-            onClick={onCerrar}
-            className="flex-1 rounded-lg border border-[#1E2B57] px-5 py-3.5 font-medium transition active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1E2B57] cursor-pointer"
+            onClick={cerrar}
+            disabled={guardando}
+            className="flex-1 rounded-lg border border-[#1E2B57] px-5 py-3.5 font-medium transition active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1E2B57] cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100"
           >
             Cancelar
           </button>
           <button
             type="button"
             onClick={onConfirmar}
-            className="flex-[2] rounded-lg bg-[#1E2B57] px-5 py-3.5 font-medium text-[#F4F6F4] transition active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1E2B57] cursor-pointer"
+            disabled={guardando}
+            className="flex-[2] rounded-lg bg-[#1E2B57] px-5 py-3.5 font-medium text-[#F4F6F4] transition active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1E2B57] cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100"
           >
-            Agregar Movimientos
+            {guardando ? "Guardando..." : "Agregar Movimientos"}
           </button>
         </div>
       </div>

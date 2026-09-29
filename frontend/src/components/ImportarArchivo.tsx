@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import type { Movimiento } from "../lib/types";
+import type { Movimiento, NuevoMovimiento } from "../lib/types";
 import { guardarMovimiento } from "../lib/movimientos";
 import { importarArchivo } from "../lib/importarArchivos";
 import ModalVisualizarMovimientos from "./ModalVisualizarMovimientos";
@@ -15,8 +15,10 @@ export default function ImportarArchivo({
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const [guardando, setGuardando] = useState(false);
   const [modalAbierto, setModalAbierto] = useState(false);
-  const [nuevosMovimientos, setNuevosMovimientos] = useState<Movimiento[]>();
+  const [nuevosMovimientos, setNuevosMovimientos] =
+    useState<NuevoMovimiento[]>();
 
   async function handleArchivo(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -30,7 +32,6 @@ export default function ImportarArchivo({
           `${cantidadInvalidos} movimiento(s) inválido(s) fueron ignorados.`,
         );
       }
-
       setNuevosMovimientos(validos);
       setModalAbierto(true);
     } catch (err) {
@@ -39,6 +40,22 @@ export default function ImportarArchivo({
       );
     } finally {
       e.target.value = "";
+    }
+  }
+
+  async function handleConfirmar() {
+    if (!nuevosMovimientos) return;
+    setGuardando(true);
+    try {
+      const movimientos: Movimiento[] = [];
+      for (const m of nuevosMovimientos)
+        movimientos.push(await guardarMovimiento(cuentaId, m));
+
+      setMovimientosArray((prev) => [...prev, ...movimientos]);
+    } catch {
+      alert("Error al guardar los movimientos.");
+    } finally {
+      setGuardando(false);
     }
   }
 
@@ -62,13 +79,10 @@ export default function ImportarArchivo({
       {nuevosMovimientos && (
         <ModalVisualizarMovimientos
           abierto={modalAbierto}
+          guardando={guardando}
           movimientos={nuevosMovimientos}
           onCerrar={() => setModalAbierto(false)}
-          onConfirmar={() => {
-            setMovimientosArray((prev) => [...prev, ...nuevosMovimientos]);
-            for (const m of nuevosMovimientos) guardarMovimiento(cuentaId, m);
-            setModalAbierto(false);
-          }}
+          onConfirmar={handleConfirmar}
         />
       )}
     </>

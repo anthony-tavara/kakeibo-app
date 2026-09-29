@@ -1,5 +1,6 @@
 import type { Movimiento, Cuenta } from "../lib/types";
 import { ars } from "../lib/utils";
+import ExportarArchivo from "./ExportarArchivo";
 import ImportarArchivo from "./ImportarArchivo";
 
 interface MontoProps {
@@ -97,12 +98,11 @@ export default function Balance({
         >
           Agregar Movimiento
         </button>
-        <div className="flex gap-2">
-          <ImportarArchivo
-            cuentaId={cuenta.id}
-            setMovimientosArray={setMovimientosArray}
-          />
-        </div>
+        <ImportarArchivo
+          cuentaId={cuenta.id}
+          setMovimientosArray={setMovimientosArray}
+        />
+        <ExportarArchivo movimientos={movimientosArray} />
       </div>
     </section>
   );

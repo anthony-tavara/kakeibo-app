@@ -7,6 +7,8 @@ export type Movimiento = {
   monto: number;
 };
 
+export type NuevoMovimiento = Omit<Movimiento, "id">;
+
 export type Cuenta = {
   id: string;
   nombre: string;

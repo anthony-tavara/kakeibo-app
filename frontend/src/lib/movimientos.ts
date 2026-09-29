@@ -1,11 +1,10 @@
-import type { Movimiento } from "./types";
+import type { Movimiento, NuevoMovimiento } from "./types";
 
 export const API_URL = import.meta.env.VITE_API_URL;
 
-export function esMovimientoValido(m: any): m is Movimiento {
+export function esMovimientoValido(m: NuevoMovimiento) {
   return (
     m &&
-    typeof m.id === "string" &&
     typeof m.esIngreso === "boolean" &&
     typeof m.monto === "number" &&
     typeof m.titulo === "string" &&
@@ -16,10 +15,9 @@ export function esMovimientoValido(m: any): m is Movimiento {
 
 export async function guardarMovimiento(
   cuentaId: string,
-  m: Movimiento,
-): Promise<boolean> {
+  m: NuevoMovimiento,
+): Promise<Movimiento> {
   const body = {
-    id: m.id,
     esIngreso: m.esIngreso,
     monto: m.monto,
     titulo: m.titulo,
@@ -27,17 +25,18 @@ export async function guardarMovimiento(
     fecha: m.fecha,
     cuenta_id: cuentaId,
   };
-  try {
-    const res = await fetch(`${API_URL}/cuentas/${cuentaId}/movimientos`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    return res.ok;
-  } catch (err) {
-    console.error("Error guardando movimiento", cuentaId, m.id, err);
-    return false;
+
+  const res = await fetch(`${API_URL}/cuentas/${cuentaId}/movimientos`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    throw new Error(`Error guardando movimiento (${res.status})`);
   }
+
+  return res.json();
 }
 
 export async function editarMovimiento(
@@ -70,10 +69,13 @@ export async function eliminarMovimiento(
   movimientoId: string,
 ): Promise<boolean> {
   try {
-    const res = await fetch(`${API_URL}/cuentas/${cuentaId}/movimientos/${movimientoId}`, {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-    });
+    const res = await fetch(
+      `${API_URL}/cuentas/${cuentaId}/movimientos/${movimientoId}`,
+      {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      },
+    );
     return res.ok;
   } catch (err) {
     console.error("Error guardando movimiento", cuentaId, movimientoId, err);

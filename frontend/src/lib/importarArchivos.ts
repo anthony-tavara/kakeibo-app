@@ -1,7 +1,6 @@
-import { v4 } from "uuid";
 import { esMovimientoValido } from "./movimientos";
 import Papa from "papaparse";
-import type { Movimiento } from "./types";
+import type { NuevoMovimiento } from "./types";
 
 const OBLIGATORIAS = ["esIngreso", "monto", "titulo", "detalle", "fecha"];
 
@@ -24,10 +23,7 @@ export async function importarCsv(file: File) {
     throw new Error("El archivo CSV no tiene movimientos.");
   }
 
-  const traeId = headers.includes("id");
-
-  const movimientos: Movimiento[] = data.map((fila) => ({
-    id: traeId && fila.id?.trim() ? fila.id.trim() : v4(),
+  const movimientos: NuevoMovimiento[] = data.map((fila) => ({
     esIngreso: fila.esIngreso?.trim().toLowerCase() === "true",
     monto: Number(fila.monto),
     titulo: fila.titulo?.trim() ?? "",
@@ -43,11 +39,14 @@ export async function importarJson(file: File) {
   const texto = await file.text();
   const movimientos = JSON.parse(texto);
 
-  const validos = movimientos.filter(esMovimientoValido);
+  const validos: NuevoMovimiento[] = movimientos.filter(esMovimientoValido);
   return { validos, cantidadInvalidos: movimientos.length - validos.length };
 }
 
-export async function importarArchivo(file: File) {
+export async function importarArchivo(file: File): Promise<{
+  validos: NuevoMovimiento[];
+  cantidadInvalidos: number;
+}> {
   const extension = file.name.split(".").pop()?.toLowerCase();
 
   if (extension === "csv") return await importarCsv(file);
