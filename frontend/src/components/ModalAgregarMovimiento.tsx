@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import type { Dispatch, FormEvent, SetStateAction } from "react";
-import type { Movimiento } from "../lib/types";
+import type { Movimiento, NuevoMovimiento } from "../lib/types";
 import { hoyISO } from "../lib/utils";
-import { v4 as uuidv4 } from "uuid";
 import { guardarMovimiento } from "../lib/movimientos";
+import { toast } from "sonner";
 
 type Props = {
   cuentaId: string;
@@ -55,7 +55,7 @@ export default function ModalMovimiento({
     setErrores({});
   }
 
-  function guardar(e: FormEvent) {
+  async function guardar(e: FormEvent) {
     e.preventDefault();
 
     const valor = Number(monto);
@@ -75,8 +75,7 @@ export default function ModalMovimiento({
       return;
     }
 
-    const nuevo: Movimiento = {
-      id: uuidv4(),
+    const nuevo: NuevoMovimiento = {
       titulo: titulo,
       esIngreso: tipo,
       detalle: descripcion,
@@ -84,11 +83,17 @@ export default function ModalMovimiento({
       monto: Number(monto),
     };
 
-    console.log("nuevo id:", nuevo.id);
-
-    setMovimientosArray((prev) => [nuevo, ...prev]);
-    guardarMovimiento(cuentaId, nuevo);
-    onCerrar();
+    try {
+      const nuevoMovimiento = await guardarMovimiento(cuentaId, nuevo);
+      setMovimientosArray((prev) => [nuevoMovimiento, ...prev]);
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Error al eliminar el movimiento.",
+      );
+    } finally {
+      onCerrar();
+      toast.success("Movimiento agregado correctamente.");
+    }
   }
 
   return (

@@ -4,7 +4,6 @@ import type { Movimiento } from "./types";
 function descargar(contenido: string, nombre: string, mime: string) {
   const blob = new Blob([contenido], { type: mime });
   const url = URL.createObjectURL(blob);
-  console.log(blob, url);
 
   const a = document.createElement("a");
   a.href = url;
@@ -15,6 +14,9 @@ function descargar(contenido: string, nombre: string, mime: string) {
 }
 
 export function exportarCsv(movimientos: Movimiento[], nombre = "movimientos") {
+  if (movimientos.length == 0)
+    throw new Error("No hay ningún movimiento registrado.");
+
   const csv = Papa.unparse(movimientos, {
     columns: ["esIngreso", "monto", "titulo", "detalle", "fecha"],
   });
@@ -26,6 +28,9 @@ export function exportarJson(
   movimientos: Movimiento[],
   nombre = "movimientos",
 ) {
+  if (movimientos.length == 0)
+    throw new Error("No hay ningún movimiento registrado.");
+
   const json = JSON.stringify(
     movimientos.map((m) => {
       return {

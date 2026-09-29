@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import type { Movimiento } from "../lib/types";
 import { ars, formatearFecha } from "../lib/utils";
 import { eliminarMovimiento } from "../lib/movimientos";
+import { toast } from "sonner";
 
 type Props = {
   cuentaId: string;
@@ -29,10 +30,18 @@ export default function ModalEliminarMovimiento({
     if (!abierto && dialogo.open) dialogo.close();
   }, [abierto]);
 
-  function confirmar() {
-    onConfirmar(movimiento.id);
-    eliminarMovimiento(cuentaId, movimiento.id);
-    onCerrar();
+  async function confirmar() {
+    try {
+      await eliminarMovimiento(cuentaId, movimiento.id);
+      onConfirmar(movimiento.id);
+      toast.success("Movimiento eliminado correctamente.");
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Error al eliminar el movimiento.",
+      );
+    } finally {
+      onCerrar();
+    }
   }
 
   return (

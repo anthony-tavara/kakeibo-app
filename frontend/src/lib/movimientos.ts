@@ -7,6 +7,7 @@ export function esMovimientoValido(m: NuevoMovimiento) {
     m &&
     typeof m.esIngreso === "boolean" &&
     typeof m.monto === "number" &&
+    m.monto > 0 &&
     typeof m.titulo === "string" &&
     typeof m.detalle === "string" &&
     /^\d{4}-\d{2}-\d{2}$/.test(m.fecha)
@@ -33,7 +34,7 @@ export async function guardarMovimiento(
   });
 
   if (!res.ok) {
-    throw new Error(`Error guardando movimiento (${res.status})`);
+    throw new Error(`Error guardando movimiento`);
   }
 
   return res.json();
@@ -67,18 +68,17 @@ export async function editarMovimiento(
 export async function eliminarMovimiento(
   cuentaId: string,
   movimientoId: string,
-): Promise<boolean> {
-  try {
-    const res = await fetch(
-      `${API_URL}/cuentas/${cuentaId}/movimientos/${movimientoId}`,
-      {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-      },
-    );
-    return res.ok;
-  } catch (err) {
-    console.error("Error guardando movimiento", cuentaId, movimientoId, err);
-    return false;
+): Promise<void> {
+  const res = await fetch(
+    `${API_URL}/cuentas/${cuentaId}/movimientos/${movimientoId}`,
+    { method: "DELETE" },
+  );
+
+  if (res.status === 404) {
+    throw new Error("No existe el movimiento a eliminar.");
+  }
+
+  if (!res.ok) {
+    throw new Error(`No se pudo eliminar el movimiento (${res.status})`);
   }
 }

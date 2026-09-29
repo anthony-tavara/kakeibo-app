@@ -3,6 +3,7 @@ import type { Movimiento, NuevoMovimiento } from "../lib/types";
 import { guardarMovimiento } from "../lib/movimientos";
 import { importarArchivo } from "../lib/importarArchivos";
 import ModalVisualizarMovimientos from "./ModalVisualizarMovimientos";
+import { toast } from "sonner";
 
 type Props = {
   setMovimientosArray: React.Dispatch<React.SetStateAction<Movimiento[]>>;
@@ -28,14 +29,20 @@ export default function ImportarArchivo({
       const { validos, cantidadInvalidos } = await importarArchivo(file);
 
       if (cantidadInvalidos > 0) {
-        alert(
+        toast.warning(
           `${cantidadInvalidos} movimiento(s) inválido(s) fueron ignorados.`,
         );
       }
+
+      if (validos.length === 0) {
+        toast.error("Ningún movimiento del archivo es válido.");
+        return;
+      }
+
       setNuevosMovimientos(validos);
       setModalAbierto(true);
     } catch (err) {
-      alert(
+      toast.error(
         err instanceof Error ? err.message : "Error al importar el archivo.",
       );
     } finally {
@@ -52,10 +59,14 @@ export default function ImportarArchivo({
         movimientos.push(await guardarMovimiento(cuentaId, m));
 
       setMovimientosArray((prev) => [...prev, ...movimientos]);
-    } catch {
-      alert("Error al guardar los movimientos.");
+      toast.success("Se agregaron los movimientos correctamente.");
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Error al guardar movimiento.",
+      );
     } finally {
       setGuardando(false);
+      setModalAbierto(false);
     }
   }
 
