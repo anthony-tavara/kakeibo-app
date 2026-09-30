@@ -1,5 +1,5 @@
 import Papa from "papaparse";
-import type { Movimiento } from "./types";
+import type { NuevoMovimiento } from "./types";
 
 function descargar(contenido: string, nombre: string, mime: string) {
   const blob = new Blob([contenido], { type: mime });
@@ -13,7 +13,7 @@ function descargar(contenido: string, nombre: string, mime: string) {
   URL.revokeObjectURL(url);
 }
 
-export function exportarCsv(movimientos: Movimiento[], nombre = "movimientos") {
+export function exportarCsv(movimientos: NuevoMovimiento[], nombre: string) {
   if (movimientos.length == 0)
     throw new Error("No hay ningún movimiento registrado.");
 
@@ -24,10 +24,7 @@ export function exportarCsv(movimientos: Movimiento[], nombre = "movimientos") {
   descargar("\uFEFF" + csv, `${nombre}.csv`, "text/csv;charset=utf-8");
 }
 
-export function exportarJson(
-  movimientos: Movimiento[],
-  nombre = "movimientos",
-) {
+export function exportarJson(movimientos: NuevoMovimiento[], nombre: string) {
   if (movimientos.length == 0)
     throw new Error("No hay ningún movimiento registrado.");
 

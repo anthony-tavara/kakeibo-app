@@ -1,12 +1,11 @@
-import type { Movimiento, Cuenta } from "../lib/types";
+import type { Movimiento } from "../lib/types";
 import { ars } from "../lib/utils";
 
 interface BalanceProps {
-  cuenta: Cuenta;
   movimientosArray: Movimiento[];
 }
 
-export default function Balance({ cuenta, movimientosArray }: BalanceProps) {
+export default function Balance({ movimientosArray }: BalanceProps) {
   const ingresos = movimientosArray
     .filter((m) => m.esIngreso)
     .reduce((acc, m) => acc + Number(m.monto), 0);
@@ -23,10 +22,6 @@ export default function Balance({ cuenta, movimientosArray }: BalanceProps) {
 
   return (
     <section>
-      <h1 className="text-sm md:text-lg font-semibold text-en text-[#1E2B57]/70 pb-4">
-        {cuenta.nombre}
-      </h1>
-
       <p className="mt-2 text-5xl font-bold tracking-tight sm:text-6xl">
         {ars.format(balance)}
       </p>
@@ -44,7 +39,7 @@ export default function Balance({ cuenta, movimientosArray }: BalanceProps) {
             />
           </div>
 
-          <dl className="grid mt-2 grid-cols-2 gap-6 border-[#1E2B57]/15 pb-10">
+          <dl className="grid mt-2 grid-cols-2 gap-6 border-[#1E2B57]/15">
             <div>
               <dt className="text-sm text-[#2E7D55]">Ingresos</dt>
               <dd className="mt-1 text-lg md:text-xl font-medium">
