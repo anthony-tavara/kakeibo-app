@@ -10,7 +10,7 @@ type Props = {
   cuentaId: string;
 };
 
-export default function ImportarArchivo({
+export default function BotonImportarArchivo({
   setMovimientosArray,
   cuentaId,
 }: Props) {
@@ -82,7 +82,7 @@ export default function ImportarArchivo({
       />
       <label
         htmlFor="import-file"
-        className="cursor-pointer text-center flex-1 rounded-lg bg-[#E8EEF0] border border-[#1E2B57]/20 px-5 py-3.5 font-medium text-[#1E2B57] transition active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1E2B57]"
+        className="cursor-pointer text-center rounded-lg bg-[#E8EEF0] border border-[#1E2B57]/20 px-5 py-3.5 font-medium text-[#1E2B57] transition active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1E2B57]"
       >
         Importar Archivo (.csv o .json)
       </label>

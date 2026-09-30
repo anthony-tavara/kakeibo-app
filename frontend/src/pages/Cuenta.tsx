@@ -8,7 +8,9 @@ import { useParams } from "react-router-dom";
 import NotFound from "../components/NotFound";
 import ModalEditarMovimiento from "../components/ModalEditarMovimiento";
 import ModalEliminarMovimiento from "../components/ModalEliminarMovimiento";
-import BotonAgregarMovimiento from "../components/BotonAgregarMovimiento";
+import BotonImportarArchivo from "../components/BotonImportarArchivo";
+import BotonExportarArchivo from "../components/BotonExportarArchivo";
+import BotonAbrirModalAgregarMovimiento from "../components/BotonAbrirModalAgregarMovimiento";
 export const API_URL = import.meta.env.VITE_API_URL;
 
 export default function Cuenta() {
@@ -62,14 +64,16 @@ export default function Cuenta() {
 
       <main className="app-font min-h-screen bg-[#E8EEF0] text-[#1E2B57]">
         <div className="mx-auto flex w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-14 px-6 py-10 sm:py-16">
-          <div>
+          <div className="flex flex-col gap-3">
             <Balance cuenta={cuenta} movimientosArray={movimientosArray} />
-            <BotonAgregarMovimiento
-              cuentaId={cuenta.id}
-              movimientos={movimientosArray}
-              setMovimientos={setMovimientosArray}
+            <BotonAbrirModalAgregarMovimiento
               setMostrarModalAgregarMovimiento={setModalAbierto}
             />
+            <BotonImportarArchivo
+              cuentaId={cuenta.id}
+              setMovimientosArray={setMovimientosArray}
+            />
+            <BotonExportarArchivo movimientos={movimientosArray} />
           </div>
 
           <Movimientos

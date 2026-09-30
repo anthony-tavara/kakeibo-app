@@ -4,7 +4,7 @@ import type { Movimiento } from "../lib/types";
 
 type Props = { movimientos: Movimiento[] };
 
-export default function ExportarArchivo({ movimientos }: Props) {
+export default function BotonExportarArchivo({ movimientos }: Props) {
   return (
     <div className="flex gap-3">
       <button
