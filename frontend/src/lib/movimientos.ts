@@ -82,3 +82,27 @@ export async function eliminarMovimiento(
     throw new Error(`No se pudo eliminar el movimiento (${res.status})`);
   }
 }
+
+export async function eliminarMovimientos(
+  cuentaId: string,
+  movimientosIds: string[],
+): Promise<void> {
+  const body = { movimientos_ids: movimientosIds };
+
+  const res = await fetch(
+    `${API_URL}/cuentas/${cuentaId}/movimientos/eliminar`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    },
+  );
+
+  if (res.status === 404) {
+    throw new Error("No existen los movimientos a eliminar.");
+  }
+
+  if (!res.ok) {
+    throw new Error(`No se eliminaron los movimientos (${res.status})`);
+  }
+}

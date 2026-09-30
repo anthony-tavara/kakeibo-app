@@ -68,6 +68,8 @@ export default function Cuenta() {
             setMovimientosArray={setMovimientosArray}
           />
           <Movimientos
+            cuentaId={cuenta.id}
+            setMovimientos={setMovimientosArray}
             onAbrirModalEditarMov={() => setMostrarModalEditarMov(true)}
             onAbrirModalEliminarMov={() => setMostrarModalEliminarMov(true)}
             setMovimientoEliminar={setMovimientoEliminar}
