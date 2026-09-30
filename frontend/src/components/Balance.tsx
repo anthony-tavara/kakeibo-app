@@ -1,21 +1,12 @@
 import type { Movimiento, Cuenta } from "../lib/types";
 import { ars } from "../lib/utils";
-import ExportarArchivo from "./ExportarArchivo";
-import ImportarArchivo from "./ImportarArchivo";
 
-interface MontoProps {
+interface BalanceProps {
   cuenta: Cuenta;
   movimientosArray: Movimiento[];
-  setMovimientosArray: React.Dispatch<React.SetStateAction<Movimiento[]>>;
-  setModalAbierto: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export default function Balance({
-  cuenta,
-  movimientosArray,
-  setModalAbierto,
-  setMovimientosArray,
-}: MontoProps) {
+export default function Balance({ cuenta, movimientosArray }: BalanceProps) {
   const ingresos = movimientosArray
     .filter((m) => m.esIngreso)
     .reduce((acc, m) => acc + Number(m.monto), 0);
@@ -69,22 +60,6 @@ export default function Balance({
           </dl>
         </>
       )}
-
-      <div className="flex flex-col gap-3">
-        <button
-          type="button"
-          aria-haspopup="dialog"
-          onClick={() => setModalAbierto(true)}
-          className="cursor-pointer flex-1 rounded-lg bg-[#1E2B57] px-5 py-3.5 font-medium text-[#F4F6F4] transition active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1E2B57]"
-        >
-          Agregar Movimiento
-        </button>
-        <ImportarArchivo
-          cuentaId={cuenta.id}
-          setMovimientosArray={setMovimientosArray}
-        />
-        <ExportarArchivo movimientos={movimientosArray} />
-      </div>
     </section>
   );
 }

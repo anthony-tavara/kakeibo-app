@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import Movimientos from "../components/Movimientos";
 import ModalAgregarMovimiento from "../components/ModalAgregarMovimiento";
 import type { Movimiento, Cuenta } from "../lib/types";
-import Monto from "../components/Balance";
+import Balance from "../components/Balance";
 import Loading from "../components/Loading";
 import { useParams } from "react-router-dom";
 import NotFound from "../components/NotFound";
 import ModalEditarMovimiento from "../components/ModalEditarMovimiento";
 import ModalEliminarMovimiento from "../components/ModalEliminarMovimiento";
+import BotonAgregarMovimiento from "../components/BotonAgregarMovimiento";
 export const API_URL = import.meta.env.VITE_API_URL;
 
 export default function Cuenta() {
@@ -61,12 +62,16 @@ export default function Cuenta() {
 
       <main className="app-font min-h-screen bg-[#E8EEF0] text-[#1E2B57]">
         <div className="mx-auto flex w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-14 px-6 py-10 sm:py-16">
-          <Monto
-            cuenta={cuenta}
-            movimientosArray={movimientosArray}
-            setModalAbierto={setModalAbierto}
-            setMovimientosArray={setMovimientosArray}
-          />
+          <div>
+            <Balance cuenta={cuenta} movimientosArray={movimientosArray} />
+            <BotonAgregarMovimiento
+              cuentaId={cuenta.id}
+              movimientos={movimientosArray}
+              setMovimientos={setMovimientosArray}
+              setMostrarModalAgregarMovimiento={setModalAbierto}
+            />
+          </div>
+
           <Movimientos
             cuentaId={cuenta.id}
             setMovimientos={setMovimientosArray}
