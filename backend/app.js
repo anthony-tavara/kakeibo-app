@@ -189,3 +189,55 @@ app.delete("/cuentas/:cuentaId/movimientos/:id", async (req, res) => {
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);
 });
+
+app.post("/cuentas/:cuentaId/movimientos/eliminar", async (req, res) => {
+  const { cuentaId } = req.params;
+
+  if (!Number.isInteger(Number(cuentaId)))
+    return res.status(400).json({ error: "cuentaId inválido" });
+
+  const { movimientos_ids } = req.body;
+
+  if (!Array.isArray(movimientos_ids) || movimientos_ids.length === 0) {
+    return res.status(400).json({ error: "movimientos inválidos" });
+  }
+
+  try {
+    const cuentaExiste = await pool.query(
+      "select 1 from cuenta where id = $1",
+      [cuentaId],
+    );
+
+    if (cuentaExiste.rowCount === 0) {
+      return res.status(404).json({ error: "Cuenta no encontrada" });
+    }
+
+    const { rows, rowCount } = await pool.query(
+      `
+      delete from movimientos
+      where id = ANY($1) and cuenta_id = $2
+      returning *
+      `,
+      [movimientos_ids, cuentaId],
+    );
+
+    if (rowCount < movimientos_ids.length) {
+      res.status(400).json({
+        error: `Error al eliminar movimientos ${movimientos_ids.length - rowCount} algunos movimientos.`,
+      });
+    }
+
+    if (rowCount === 0) {
+      return res.status(404).json({ error: "Ningún movimiento encontrado" });
+    }
+
+    res.status(200).json(rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "No se pudo eliminar los movimientos" });
+  }
+});
+
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`);
+});
